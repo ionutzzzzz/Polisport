@@ -63,9 +63,7 @@ export default function DrawManager({ teams, hasGroups, hasMatches, canDrawGroup
           <div>
             <h3 className="text-lg font-bold text-gray-900 mb-2">1. Grupe</h3>
             <p className="text-sm text-gray-500 mb-6">
-              {sport === "basketball" 
-                ? "Împarte automat cele 16 echipe în 4 grupe (A, B, C, D) a câte 4 echipe." 
-                : "Împarte automat cele 36 de echipe în 4 grupe (A, B, C, D) a câte 9 echipe."}
+              Împarte automat cele {teams.length} echipe în 4 grupe (A, B, C, D) a câte {Math.floor(teams.length / 4)} echipe.
             </p>
           </div>
           <button

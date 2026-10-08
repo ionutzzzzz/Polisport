@@ -24,8 +24,8 @@ export default async function AdminProgramPage() {
       round,
       penalty_winner_id,
       match_time,
-      home_team:teams!matches_home_team_id_fkey(id, name),
-      away_team:teams!matches_away_team_id_fkey(id, name),
+      home_team:teams!matches_home_team_id_fkey(id, name, group_name),
+      away_team:teams!matches_away_team_id_fkey(id, name, group_name),
       match_events(
         id,
         player_id,

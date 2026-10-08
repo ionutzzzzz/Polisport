@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import type { DrawPair } from "@/lib/draw-algorithm";
 import { getCurrentSport } from "@/lib/sport";
@@ -8,10 +8,7 @@ import { getCurrentSport } from "@/lib/sport";
 type ActionResult = { success: true } | { error: string };
 
 export async function saveGeneratedMatches(pairs: DrawPair[]): Promise<ActionResult> {
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabaseAdmin = createAdminClient();
   const sport = await getCurrentSport();
 
   // Verificăm dacă sunt deja meciuri în faza grupelor

@@ -1,26 +1,14 @@
-import { createClient } from "@supabase/supabase-js";
+import { getDb } from "@/lib/db";
+import { QueryBuilder } from "@/lib/db/query-builder";
 
 /**
- * Client Supabase Public pentru Server (Server Components, Route Handlers).
- * Folosește service_role_key pentru operațiuni publice (bypassează RLS).
+ * Client Public pentru Server Components.
+ * Conectat direct la SQLite local cu structura și datele din Supabase.
  */
 export function createPublicClient() {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    throw new Error("NEXT_PUBLIC_SUPABASE_URL lipsește.");
-  }
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY lipsește.");
-  }
-
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-        detectSessionInUrl: false,
-      },
-    }
-  );
+  const db = getDb();
+  return {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    from: (table: string) => new QueryBuilder<any>(db, table),
+  };
 }

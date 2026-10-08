@@ -1,12 +1,49 @@
-import { createBrowserClient } from "@supabase/ssr";
-
 /**
- * Client Supabase pentru Browser (componente client-side).
- * Folosit în componente React marcate cu "use client".
+ * Client pentru browser (componente client-side).
+ * Suportă autentificare locală și încărcare locală de fișiere pentru carnete.
  */
 export function createClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  return {
+    auth: {
+      signOut: async () => {
+        try {
+          await fetch("/api/auth/logout", { method: "POST" });
+        } catch {
+          // ignore
+        }
+      },
+    },
+    storage: {
+      from: (bucket: string) => ({
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        upload: async (filePath: string, file: File, _options?: unknown) => {
+          try {
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("filePath", filePath);
+            formData.append("bucket", bucket);
+            const res = await fetch("/api/storage/upload", {
+              method: "POST",
+              body: formData,
+            });
+            const json = await res.json();
+            if (!res.ok || json.error) {
+              return { data: null, error: { message: json.error || "Upload failed" } };
+            }
+            return { data: { path: filePath }, error: null };
+          } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : String(err);
+            return { data: null, error: { message: msg } };
+          }
+        },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        createSignedUrl: async (filePath: string, _expiresIn?: number) => {
+          return {
+            data: { signedUrl: `/uploads/${filePath}` },
+            error: null,
+          };
+        },
+      }),
+    },
+  };
 }

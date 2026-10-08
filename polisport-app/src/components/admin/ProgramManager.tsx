@@ -37,8 +37,8 @@ interface Match {
   stage: string;
   match_time?: string | null;
   penalty_winner_id?: string | null;
-  home_team: { id: string; name: string };
-  away_team: { id: string; name: string };
+  home_team: { id: string; name: string; group_name?: string | null };
+  away_team: { id: string; name: string; group_name?: string | null };
   match_events: GoalEvent[];
 }
 
@@ -81,6 +81,7 @@ export default function ProgramManager({
   const [isPending, startTransition] = useTransition();
   const [filter, setFilter] = useState<"all" | "scheduled" | "finished">("all");
   const [stageFilter, setStageFilter] = useState<"all" | "group" | "playoff" | "ro16" | "quarter" | "semi" | "final" | "third_place">("all");
+  const [groupFilter, setGroupFilter] = useState<"all" | "A" | "B" | "C" | "D">("all");
   const [penaltyWinnerId, setPenaltyWinnerId] = useState<string | null>(null);
   const [forfeitLoserId, setForfeitLoserId] = useState<string | null>(null);
   const addFormRef = useRef<HTMLFormElement>(null);
@@ -95,6 +96,10 @@ export default function ProgramManager({
     if (filter === "scheduled" && m.status !== "scheduled" && m.status !== "in_progress") return false;
     if (filter === "finished" && m.status !== "finished") return false;
     if (stageFilter !== "all" && m.stage !== stageFilter) return false;
+    if (stageFilter === "group" && groupFilter !== "all") {
+      const g = m.home_team.group_name || m.away_team?.group_name;
+      if (g !== groupFilter) return false;
+    }
     return true;
   });
 
@@ -236,6 +241,23 @@ export default function ProgramManager({
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 items-end">
+          {stageFilter === "group" && (
+            <div className="flex gap-1.5 p-1 bg-blue-50/80 rounded-xl text-xs font-bold border border-blue-200/60 overflow-x-auto">
+              {(["all", "A", "B", "C", "D"] as const).map(g => (
+                <button
+                  key={g}
+                  onClick={() => setGroupFilter(g)}
+                  className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
+                    groupFilter === g
+                      ? "bg-blue-600 text-white shadow-xs"
+                      : "text-blue-900 hover:bg-blue-100"
+                  }`}
+                >
+                  {g === "all" ? "Toate Grupele" : `Grupa ${g}`}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="flex gap-2 p-1 bg-gray-100 rounded-xl text-sm font-semibold overflow-x-auto max-w-full">
             {(["all", "group", "ro16", "quarter", "semi", "final", "third_place"] as const).map(s => {
               if (sport === "basketball" && s === "ro16") return null;
@@ -297,14 +319,28 @@ export default function ProgramManager({
                   const matchHour = match.match_time ? new Date(match.match_time).toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' }) : 'N/A';
                   
                   const stageLabels: Record<string, string> = { group: "Grupe", ro16: "Optimi", quarter: "Sferturi", semi: "Semifinale", final: "Finala", third_place: "Finala Mică" };
-                  const stageName = stageLabels[match.stage] || match.stage;
+                  const groupName = match.home_team.group_name || match.away_team?.group_name;
+                  const groupColor = groupName === "A" ? "bg-blue-50 text-blue-700 border-blue-200"
+                    : groupName === "B" ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                    : groupName === "C" ? "bg-purple-50 text-purple-700 border-purple-200"
+                    : groupName === "D" ? "bg-amber-50 text-amber-700 border-amber-200"
+                    : "bg-gray-100 text-gray-700 border-gray-200";
 
                   return (
                     <li key={match.id} className="p-4 hover:bg-gray-50/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       {/* Ora & Etapa */}
-                      <div className="flex flex-col min-w-[100px]">
+                      <div className="flex flex-col min-w-[110px]">
                         <span className="text-lg font-black text-gray-900">{matchHour}</span>
-                        <span className="text-xs font-bold text-blue-600 uppercase">{stageName}</span>
+                        {match.stage === "group" ? (
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black border w-fit shadow-2xs ${groupColor}`}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
+                            Grupa {groupName || "?"}
+                          </span>
+                        ) : (
+                          <span className="text-xs font-bold text-rose-600 uppercase">
+                            {stageLabels[match.stage] || match.stage}
+                          </span>
+                        )}
                       </div>
 
                       <div className="flex-1 flex items-center justify-center gap-4">
@@ -407,7 +443,7 @@ export default function ProgramManager({
 
         return (
           <Modal
-            title={`${modalMatch.home_team.name} vs ${modalMatch.away_team.name}`}
+            title={`${modalMatch.home_team.name} vs ${modalMatch.away_team.name}${modalMatch.stage === 'group' ? ` (Grupa ${modalMatch.home_team.group_name || modalMatch.away_team?.group_name || '?'})` : ''}`}
             onClose={close}
           >
             {/* Scor curent */}

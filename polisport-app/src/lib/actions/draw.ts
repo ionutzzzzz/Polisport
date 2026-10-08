@@ -1,20 +1,18 @@
 "use server";
 
-import { createClient } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { getCurrentSport } from "@/lib/sport";
 
 type ActionResult = { success: true } | { error: string };
 
 function getAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  return createAdminClient();
 }
 
 /**
  * Împarte echipele în 4 grupe (A, B, C, D)
+ * Suportă 32 de echipe, 36 de echipe sau orice număr divizibil cu 4 (minim 8).
  */
 export async function drawGroupsAction(): Promise<ActionResult> {
   const supabase = getAdminClient();
@@ -23,37 +21,33 @@ export async function drawGroupsAction(): Promise<ActionResult> {
   // 1. Fetch echipe
   const { data: teams, error: fetchErr } = await supabase.from("teams").select("id").eq("sport_type", sport);
   if (fetchErr) return { error: fetchErr.message };
-  
-  const expectedTeams = sport === "basketball" ? 16 : 36;
-  if (!teams || teams.length !== expectedTeams) {
-    return { error: `Pentru ${sport} trebuie să existe exact ${expectedTeams} de echipe. Găsite: ${teams?.length || 0}.` };
+
+  if (!teams || teams.length < 8) {
+    return { error: `Sunt necesare minimum 8 echipe pentru ${sport}. Găsite: ${teams?.length || 0}.` };
   }
 
-  // 2. Amestecăm echipele (Fisher-Yates)
+  // 2. Amestecăm echipele aleatoriu (Fisher-Yates)
   const shuffled = [...teams];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
 
-  // 3. Asignăm grupele
+  // 3. Asignăm grupele (A, B, C, D)
+  // Distribuire echilibrată prin rotație (pentru 32 de echipe: exact 8 pe grupă)
   const groups = ["A", "B", "C", "D"];
-  const teamsPerGroup = expectedTeams / 4;
-  
-  const updates = shuffled.map((team, index) => {
-    const groupIndex = Math.floor(index / teamsPerGroup);
-    return {
-      id: team.id,
-      group_name: groups[groupIndex]
-    };
-  });
 
-  const updatePromises = updates.map(u => 
+  const updates = shuffled.map((team, index) => ({
+    id: team.id,
+    group_name: groups[index % 4],
+  }));
+
+  const updatePromises = updates.map((u) =>
     supabase.from("teams").update({ group_name: u.group_name }).eq("id", u.id)
   );
 
   const results = await Promise.all(updatePromises);
-  const err = results.find(r => r.error);
+  const err = results.find((r) => r.error);
   if (err) return { error: err.error!.message };
 
   revalidatePath("/admin/tragere-la-sorti");
@@ -62,7 +56,8 @@ export async function drawGroupsAction(): Promise<ActionResult> {
 }
 
 /**
- * Generează meciuri pentru echipele din grupe (4 meciuri pe echipă)
+ * Generează meciuri pentru echipele din grupe
+ * Suportă 32 de echipe (8 pe grupă), 36 de echipe (9 pe grupă) sau alte configurații
  */
 export async function drawMatchesAction(): Promise<ActionResult> {
   const supabase = getAdminClient();
@@ -75,7 +70,7 @@ export async function drawMatchesAction(): Promise<ActionResult> {
   const { data: teams, error: fetchErr } = await supabase.from("teams").select("id, group_name").eq("sport_type", sport);
   if (fetchErr) return { error: fetchErr.message };
 
-  if (!teams || teams.some(t => !t.group_name)) {
+  if (!teams || teams.some((t) => !t.group_name)) {
     return { error: "Nu toate echipele au o grupă alocată. Faceți mai întâi tragerea grupelor." };
   }
 
@@ -86,12 +81,19 @@ export async function drawMatchesAction(): Promise<ActionResult> {
     grouped[t.group_name].push(t.id);
   }
 
-  const matchesToInsert: any[] = [];
-  const expectedPerGroup = sport === "basketball" ? 4 : 9;
+  const matchesToInsert: {
+    home_team_id: string;
+    away_team_id: string;
+    stage: string;
+    status: string;
+    match_time: null;
+    sport_type: string;
+  }[] = [];
 
   for (const [group, groupTeams] of Object.entries(grouped)) {
-    if (groupTeams.length !== expectedPerGroup) {
-      return { error: `Grupa ${group} are ${groupTeams.length} echipe. Trebuie să aibă exact ${expectedPerGroup}.` };
+    const n = groupTeams.length;
+    if (n < 2) {
+      return { error: `Grupa ${group} are prea puține echipe (${n}).` };
     }
 
     const arr = [...groupTeams];
@@ -100,23 +102,23 @@ export async function drawMatchesAction(): Promise<ActionResult> {
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
 
-    if (sport === "basketball") {
-      // Fiecare cu fiecare (4 echipe = 6 meciuri)
-      for (let i = 0; i < arr.length; i++) {
-        for (let j = i + 1; j < arr.length; j++) {
+    if (sport === "basketball" || n <= 4) {
+      // Fiecare cu fiecare
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
           matchesToInsert.push({
             home_team_id: arr[i],
             away_team_id: arr[j],
             stage: "group",
             status: "scheduled",
             match_time: null,
-            sport_type: sport
+            sport_type: sport,
           });
         }
       }
     } else {
-      // Fotbal (Distanța 1 și 2)
-      const n = arr.length;
+      // Fotbal cu n >= 5 (de exemplu 8 echipe per grupă = 32 echipe, sau 9 per grupă = 36 echipe)
+      // Fiecare echipă joacă exact 4 meciuri: cu adversarul de la distanța 1 și distanța 2
       for (let i = 0; i < n; i++) {
         matchesToInsert.push({
           home_team_id: arr[i],
@@ -124,7 +126,7 @@ export async function drawMatchesAction(): Promise<ActionResult> {
           stage: "group",
           status: "scheduled",
           match_time: null,
-          sport_type: sport
+          sport_type: sport,
         });
       }
       for (let i = 0; i < n; i++) {
@@ -134,7 +136,7 @@ export async function drawMatchesAction(): Promise<ActionResult> {
           stage: "group",
           status: "scheduled",
           match_time: null,
-          sport_type: sport
+          sport_type: sport,
         });
       }
     }

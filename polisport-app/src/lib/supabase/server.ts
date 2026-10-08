@@ -1,31 +1,16 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { getDb } from "@/lib/db";
+import { QueryBuilder } from "@/lib/db/query-builder";
+import * as localAuth from "@/lib/db/auth";
 
 /**
- * Client Supabase pentru Server (Server Components, Route Handlers, Server Actions).
- * Citeste cookie-urile din request pentru a gestiona sesiunea utilizatorului.
+ * Client Server pentru Server Components, Route Handlers și Server Actions.
+ * Conectat direct la SQLite local cu structura și datele din Supabase.
  */
 export async function createClient() {
-  const cookieStore = await cookies();
-
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {
-            // setAll apelat dintr-un Server Component — ignorat în siguranță.
-          }
-        },
-      },
-    }
-  );
+  const db = getDb();
+  return {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    from: (table: string) => new QueryBuilder<any>(db, table),
+    auth: localAuth,
+  };
 }

@@ -1,26 +1,16 @@
-import { createClient as createServerClient } from "@supabase/supabase-js";
+import { getDb } from "@/lib/db";
+import { QueryBuilder } from "@/lib/db/query-builder";
+import * as localAuth from "@/lib/db/auth";
 
 /**
- * Client Supabase cu Service Role (acces ADMIN complet).
- * ATENȚIE: Folosit EXCLUSIV în Server Actions / API Routes server-side.
- * NU expuneți acest client în browser — bypasează toate politicile RLS!
+ * Client Admin pentru Server Actions / API Routes.
+ * Conectat direct la SQLite local cu structura și datele din Supabase.
  */
 export function createAdminClient() {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    throw new Error("NEXT_PUBLIC_SUPABASE_URL lipsește din variabilele de mediu.");
-  }
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY lipsește din variabilele de mediu.");
-  }
-
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    }
-  );
+  const db = getDb();
+  return {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    from: (table: string) => new QueryBuilder<any>(db, table),
+    auth: localAuth,
+  };
 }

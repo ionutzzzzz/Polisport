@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 
 type ActionResult = { success: true } | { error: string };
@@ -8,10 +8,7 @@ type PlayerRole = "player" | "goalkeeper";
 
 // ─── CREATE ────────────────────────────────────────────────────────────────
 export async function createPlayerAction(formData: FormData): Promise<ActionResult> {
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabaseAdmin = createAdminClient();
 
   const team_id      = formData.get("team_id") as string;
   const name         = (formData.get("name") as string)?.trim();
@@ -46,10 +43,7 @@ export async function createPlayerAction(formData: FormData): Promise<ActionResu
 
 // ─── UPDATE ────────────────────────────────────────────────────────────────
 export async function updatePlayerAction(formData: FormData): Promise<ActionResult> {
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabaseAdmin = createAdminClient();
 
   const id           = formData.get("id") as string;
   const team_id      = formData.get("team_id") as string;
@@ -86,10 +80,7 @@ export async function updatePlayerAction(formData: FormData): Promise<ActionResu
 
 // ─── DELETE ────────────────────────────────────────────────────────────────
 export async function deletePlayerAction(id: string): Promise<ActionResult> {
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabaseAdmin = createAdminClient();
 
   const { error } = await supabaseAdmin
     .from("players")

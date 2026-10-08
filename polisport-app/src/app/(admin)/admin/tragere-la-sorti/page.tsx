@@ -28,14 +28,14 @@ export default async function AdminDrawPage() {
   const hasGroups = teams.some(t => t.group_name !== null);
   const hasMatches = (matchesCount ?? 0) > 0;
   
-  const expectedTeamsCount = sport === "basketball" ? 16 : 36;
+  const canDrawGroups = teams.length >= 8;
 
   return (
     <div className="p-6 lg:p-8 max-w-6xl">
       <div className="mb-8">
         <h1 className="text-2xl font-black text-gray-900">🎲 Tragere la Sorți</h1>
         <p className="text-gray-500 text-sm mt-1">
-          Împarte echipele în grupe și generează meciurile pentru faza grupelor.
+          Împarte echipele în grupe și generează meciurile pentru faza grupelor (suportă 32 de echipe sau orice număr ≥ 8).
         </p>
       </div>
 
@@ -45,10 +45,10 @@ export default async function AdminDrawPage() {
         </div>
       )}
 
-      {teams.length !== expectedTeamsCount && (
+      {!canDrawGroups && (
         <div className="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200">
           <p className="text-amber-800 text-sm font-semibold flex items-center gap-2">
-            <span>⚠️</span> E nevoie de exact {expectedTeamsCount} echipe pentru a genera cele 4 grupe. Ai momentan {teams.length} echipe.
+            <span>⚠️</span> E nevoie de minimum 8 echipe pentru a forma cele 4 grupe (A, B, C, D). Ai momentan {teams.length} echipe.
           </p>
         </div>
       )}
@@ -57,7 +57,7 @@ export default async function AdminDrawPage() {
         teams={teams}
         hasGroups={hasGroups}
         hasMatches={hasMatches}
-        canDrawGroups={teams.length === expectedTeamsCount}
+        canDrawGroups={canDrawGroups}
         sport={sport}
       />
     </div>

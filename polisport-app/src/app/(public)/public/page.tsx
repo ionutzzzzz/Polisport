@@ -160,16 +160,30 @@ export default async function PublicPage({ searchParams }: { searchParams: Promi
                 const homeScore = m.status === "finished" ? m.home_score : homeScoreLive;
                 const awayScore = m.status === "finished" ? m.away_score : awayScoreLive;
 
-                return (
-                <li key={m.id} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
-                      {m.stage === "group" ? `Grupa ${(m.home_team as any)?.group_name || '?'}` : ({ ro16: "Optimi", quarter: "Sferturi", semi: "Semifinale", final: "Finala", third_place: "Finala Mică" } as Record<string, string>)[m.stage] || "Eliminatoriu"}
-                    </span>
-                    <span className="text-sm font-medium text-gray-500">
-                      {new Date(m.match_time!).toLocaleString("ro-RO", { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
+                  const groupName = (m.home_team as any)?.group_name || (m.away_team as any)?.group_name;
+                  const groupColor = groupName === "A" ? "bg-blue-50 text-blue-700 border-blue-200"
+                    : groupName === "B" ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                    : groupName === "C" ? "bg-purple-50 text-purple-700 border-purple-200"
+                    : groupName === "D" ? "bg-amber-50 text-amber-700 border-amber-200"
+                    : "bg-gray-100 text-gray-700 border-gray-200";
+
+                  return (
+                  <li key={m.id} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-50 transition-colors">
+                    <div className="flex flex-col gap-1.5 min-w-[120px]">
+                      {m.stage === "group" ? (
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-black border w-fit ${groupColor}`}>
+                          <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
+                          Grupa {groupName || "?"}
+                        </span>
+                      ) : (
+                        <span className="text-xs font-bold text-rose-600 uppercase tracking-wider">
+                          {({ ro16: "Optimi", quarter: "Sferturi", semi: "Semifinale", final: "Finala", third_place: "Finala Mică" } as Record<string, string>)[m.stage] || "Eliminatoriu"}
+                        </span>
+                      )}
+                      <span className="text-sm font-medium text-gray-500">
+                        {new Date(m.match_time!).toLocaleString("ro-RO", { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
 
                   <div className="flex items-center gap-4 sm:gap-6 bg-gray-50/50 sm:bg-transparent p-3 sm:p-0 rounded-xl">
                     <div className={`flex items-center justify-end gap-2 font-bold w-32 sm:w-40 text-right ${homeScore !== null && homeScore > (awayScore || 0) ? 'text-gray-900' : 'text-gray-600'}`}>
