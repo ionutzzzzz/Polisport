@@ -1,0 +1,402 @@
+@import "tailwindcss";
+
+/* ============================================
+   POLISPORT TOURNAMENT - Design System
+   Tema: Alb & Verde
+   ============================================ */
+
+@theme inline {
+  /* === CULORI PRINCIPALE === */
+  --color-primary:         #16a34a;   /* green-600 – culoarea primară */
+  --color-primary-light:   #22c55e;   /* green-500 – hover / accent */
+  --color-primary-dark:    #15803d;   /* green-700 – stări active */
+  --color-primary-darker:  #166534;   /* green-800 – text pe fundal verde */
+  --color-primary-subtle:  #dcfce7;   /* green-100 – fundal subtil verde */
+  --color-primary-muted:   #bbf7d0;   /* green-200 – borduri, separatoare */
+
+  /* === CULORI NEUTRALE (Alb + Griuri) === */
+  --color-white:           #ffffff;
+  --color-surface:         #f0fdf4;   /* green-50  – fundal pagina */
+  --color-surface-card:    #ffffff;   /* fundal carduri */
+  --color-border:          #bbf7d0;   /* green-200 – borduri */
+  --color-border-strong:   #86efac;   /* green-300 – borduri accentuate */
+
+  /* === TEXT === */
+  --color-text-primary:    #14532d;   /* green-900 – text principal */
+  --color-text-secondary:  #166534;   /* green-800 – text secundar */
+  --color-text-muted:      #4ade80;   /* green-400 – text dezactivat */
+  --color-text-on-green:   #ffffff;   /* text pe fundal verde */
+
+  /* === STĂRI === */
+  --color-success:         #16a34a;
+  --color-warning:         #ca8a04;   /* yellow-600 */
+  --color-danger:          #dc2626;   /* red-600 */
+  --color-info:            #0284c7;   /* sky-600 */
+
+  /* === FUNDAL PRINCIPAL === */
+  --color-background: var(--color-surface);
+  --color-foreground: var(--color-text-primary);
+
+  /* === FONTURI === */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Inter', system-ui, sans-serif;
+
+  /* === RAZE BORDURI === */
+  --radius-sm:   0.375rem;
+  --radius-md:   0.5rem;
+  --radius-lg:   0.75rem;
+  --radius-xl:   1rem;
+  --radius-2xl:  1.5rem;
+  --radius-full: 9999px;
+
+  /* === UMBRE === */
+  --shadow-sm:   0 1px 3px 0 rgb(22 163 74 / 0.08), 0 1px 2px -1px rgb(22 163 74 / 0.08);
+  --shadow-md:   0 4px 6px -1px rgb(22 163 74 / 0.10), 0 2px 4px -2px rgb(22 163 74 / 0.10);
+  --shadow-lg:   0 10px 15px -3px rgb(22 163 74 / 0.10), 0 4px 6px -4px rgb(22 163 74 / 0.10);
+  --shadow-xl:   0 20px 25px -5px rgb(22 163 74 / 0.12), 0 8px 10px -6px rgb(22 163 74 / 0.12);
+
+  /* === TRANZIȚII === */
+  --transition-fast:   150ms ease;
+  --transition-base:   200ms ease;
+  --transition-slow:   300ms ease;
+}
+
+/* ============================================
+   STILURI GLOBALE
+   ============================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   COMPONENTE REUTILIZABILE
+   ============================================ */
+
+/* Butoane */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: var(--radius-lg);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-text-on-green);
+  border-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-primary-subtle);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border-color: transparent;
+}
+
+.btn-ghost:hover {
+  background-color: var(--color-primary-subtle);
+  color: var(--color-primary);
+}
+
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  border-radius: var(--radius-md);
+}
+
+.btn-lg {
+  padding: 0.875rem 1.75rem;
+  font-size: 1rem;
+  border-radius: var(--radius-xl);
+}
+
+.btn-danger {
+  background-color: var(--color-danger);
+  color: #ffffff;
+  border-color: var(--color-danger);
+}
+
+.btn-danger:hover {
+  background-color: #b91c1c;
+  border-color: #b91c1c;
+  transform: translateY(-1px);
+}
+
+/* Carduri */
+.card {
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: box-shadow var(--transition-base);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(135deg, var(--color-primary-subtle) 0%, #ffffff 100%);
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.card-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+/* Badge-uri */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+}
+
+.badge-green {
+  background-color: var(--color-primary-subtle);
+  color: var(--color-primary-dark);
+  border-color: var(--color-primary-muted);
+}
+
+.badge-solid-green {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.badge-warning {
+  background-color: #fef9c3;
+  color: #854d0e;
+  border-color: #fde047;
+}
+
+.badge-danger {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+/* Input-uri și Formulare */
+.form-input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+  background-color: #ffffff;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
+}
+
+.form-input::placeholder {
+  color: #9ca3af;
+}
+
+.form-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgb(22 163 74 / 0.15);
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.375rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+/* Tabele */
+.table-container {
+  overflow-x: auto;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table thead {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: #ffffff;
+}
+
+.table thead th {
+  padding: 0.875rem 1rem;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color var(--transition-fast);
+}
+
+.table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background-color: var(--color-primary-subtle);
+}
+
+.table tbody td {
+  padding: 0.875rem 1rem;
+  color: var(--color-text-primary);
+  vertical-align: middle;
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #f9fef9;
+}
+
+/* Rank-uri speciale în clasament */
+.rank-qualified {
+  background-color: #dcfce7 !important;
+  border-left: 4px solid var(--color-primary);
+}
+
+.rank-playoff {
+  background-color: #fefce8 !important;
+  border-left: 4px solid #ca8a04;
+}
+
+/* Separatoare de secțiune */
+.section-divider {
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-muted) 50%, transparent 100%);
+  border: none;
+  margin: 2rem 0;
+}
+
+/* Animații */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(22 163 74 / 0.4); }
+  50%       { box-shadow: 0 0 0 8px rgb(22 163 74 / 0); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp var(--transition-slow) ease forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--transition-slow) ease forwards;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Scrollbar personalizat */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary-muted);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}

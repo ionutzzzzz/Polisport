@@ -1,0 +1,349 @@
+{
+  "match_events": {
+    "description": "Evenimente dintr-un meci: goluri marcate (c\u00e2mp) sau goluri primite (portari).",
+    "required": [
+      "id",
+      "match_id",
+      "player_id",
+      "team_id",
+      "event_type",
+      "created_at"
+    ],
+    "properties": {
+      "id": {
+        "default": "gen_random_uuid()",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "match_id": {
+        "description": "Note:\nThis is a Foreign Key to `matches.id`.<fk table='matches' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "player_id": {
+        "description": "Note:\nThis is a Foreign Key to `players.id`.<fk table='players' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "team_id": {
+        "description": "Note:\nThis is a Foreign Key to `teams.id`.<fk table='teams' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "event_type": {
+        "enum": [
+          "goal_scored",
+          "goal_conceded",
+          "yellow_card",
+          "red_card"
+        ],
+        "format": "public.event_type",
+        "type": "string"
+      },
+      "minute": {
+        "format": "integer",
+        "type": "integer"
+      },
+      "created_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "sport_type": {
+        "default": "football",
+        "format": "character varying",
+        "type": "string"
+      },
+      "points_value": {
+        "default": 1,
+        "format": "integer",
+        "type": "integer"
+      }
+    },
+    "type": "object"
+  },
+  "matches": {
+    "description": "Toate meciurile turneului, inclusiv fazele eliminatorii.",
+    "required": [
+      "id",
+      "home_team_id",
+      "away_team_id",
+      "status",
+      "stage",
+      "created_at"
+    ],
+    "properties": {
+      "id": {
+        "default": "gen_random_uuid()",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "home_team_id": {
+        "description": "Note:\nThis is a Foreign Key to `teams.id`.<fk table='teams' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "away_team_id": {
+        "description": "Note:\nThis is a Foreign Key to `teams.id`.<fk table='teams' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "match_time": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "home_score": {
+        "format": "integer",
+        "type": "integer"
+      },
+      "away_score": {
+        "format": "integer",
+        "type": "integer"
+      },
+      "status": {
+        "default": "scheduled",
+        "enum": [
+          "scheduled",
+          "in_progress",
+          "finished"
+        ],
+        "format": "public.match_status",
+        "type": "string"
+      },
+      "stage": {
+        "default": "group",
+        "enum": [
+          "group",
+          "playoff",
+          "ro16",
+          "quarter",
+          "semi",
+          "final",
+          "third_place"
+        ],
+        "format": "public.match_stage",
+        "type": "string"
+      },
+      "round": {
+        "format": "integer",
+        "type": "integer"
+      },
+      "created_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "penalty_winner_id": {
+        "description": "Note:\nThis is a Foreign Key to `teams.id`.<fk table='teams' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "match_date": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "bracket_position": {
+        "format": "character varying",
+        "type": "string"
+      },
+      "sport_type": {
+        "default": "football",
+        "format": "character varying",
+        "type": "string"
+      },
+      "forfeit_loser_id": {
+        "description": "Note:\nThis is a Foreign Key to `teams.id`.<fk table='teams' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "players": {
+    "description": "Juc\u0103torii fiec\u0103rei echipe. Coloana id_card_url este accesibil\u0103 EXCLUSIV adminilor.",
+    "required": [
+      "id",
+      "team_id",
+      "name",
+      "jersey_number",
+      "role",
+      "goals_scored",
+      "goals_conceded",
+      "created_at"
+    ],
+    "properties": {
+      "id": {
+        "default": "gen_random_uuid()",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "team_id": {
+        "description": "Note:\nThis is a Foreign Key to `teams.id`.<fk table='teams' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "name": {
+        "format": "text",
+        "type": "string"
+      },
+      "jersey_number": {
+        "format": "integer",
+        "type": "integer"
+      },
+      "role": {
+        "default": "player",
+        "enum": [
+          "player",
+          "goalkeeper"
+        ],
+        "format": "public.player_role",
+        "type": "string"
+      },
+      "id_card_url": {
+        "description": "URL poza carnet juc\u0103tor. NU se expune publicului prin politici RLS.",
+        "format": "text",
+        "type": "string"
+      },
+      "goals_scored": {
+        "default": 0,
+        "format": "integer",
+        "type": "integer"
+      },
+      "goals_conceded": {
+        "default": 0,
+        "format": "integer",
+        "type": "integer"
+      },
+      "created_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "teams": {
+    "description": "Echipele participante \u00een turneu.",
+    "required": [
+      "id",
+      "name",
+      "points",
+      "played",
+      "won",
+      "drawn",
+      "lost",
+      "goals_scored",
+      "goals_conceded",
+      "created_at"
+    ],
+    "properties": {
+      "id": {
+        "default": "gen_random_uuid()",
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "name": {
+        "format": "text",
+        "type": "string"
+      },
+      "points": {
+        "default": 0,
+        "format": "integer",
+        "type": "integer"
+      },
+      "played": {
+        "default": 0,
+        "format": "integer",
+        "type": "integer"
+      },
+      "won": {
+        "default": 0,
+        "format": "integer",
+        "type": "integer"
+      },
+      "drawn": {
+        "default": 0,
+        "format": "integer",
+        "type": "integer"
+      },
+      "lost": {
+        "default": 0,
+        "format": "integer",
+        "type": "integer"
+      },
+      "goals_scored": {
+        "default": 0,
+        "format": "integer",
+        "type": "integer"
+      },
+      "goals_conceded": {
+        "default": 0,
+        "format": "integer",
+        "type": "integer"
+      },
+      "created_at": {
+        "default": "now()",
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "group_name": {
+        "format": "character varying",
+        "maxLength": 1,
+        "type": "string"
+      },
+      "sport_type": {
+        "default": "football",
+        "format": "character varying",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "public_players": {
+    "properties": {
+      "id": {
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "team_id": {
+        "description": "Note:\nThis is a Foreign Key to `teams.id`.<fk table='teams' column='id'/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "name": {
+        "format": "text",
+        "type": "string"
+      },
+      "jersey_number": {
+        "format": "integer",
+        "type": "integer"
+      },
+      "role": {
+        "enum": [
+          "player",
+          "goalkeeper"
+        ],
+        "format": "public.player_role",
+        "type": "string"
+      },
+      "goals_scored": {
+        "format": "integer",
+        "type": "integer"
+      },
+      "goals_conceded": {
+        "format": "integer",
+        "type": "integer"
+      },
+      "created_at": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  }
+}
